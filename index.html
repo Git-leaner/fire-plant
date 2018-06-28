@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>打飞机</title>
+    <meta name="description" content="37期js班学员作业">
+    <meta name="keywords" content="">
+    <link href="" rel="stylesheet">
+    <style>
+        *{margin: 0;padding: 0; font-family: "Microsoft yahei", Serif}
+        ul,li{list-style: none}
+        #wrap{
+            position: relative;
+            width:420px;
+            height: 640px;
+            margin: 50px auto;
+        }
+        #map{
+            overflow: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("img/bg_1.jpg");
+        }
+        #level{
+            position: absolute;
+            top:0px;
+            width: 100%;
+            z-index: 1;
+        }
+        #level h3{
+            width: 400px;
+            height: 50px;
+            margin:120px auto;
+            text-align: center;
+            font-size: 36px;
+            font-weight: bolder;
+            color: #fff;
+        }
+        #level li{
+            width: 200px;
+            height: 30px;
+            margin:30px auto;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            background: #f8f8f8;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bolder;
+            cursor: pointer;
+        }
+        #level li:hover{
+            background: pink;
+            color: #f8f8f8;
+        }
+
+        #map .plane,#map .enemy,#map .butter,#map .oboom,#map .oboom2{
+            position: absolute;
+        }
+        .butter{
+            z-index: 1;
+        }
+        .enemy{
+            z-index: 2;
+        }
+        .oboom2{
+            animation: bling 2s 1;
+            animation-fill-mode: forwards ;
+        }
+        .oboom{
+            animation: fade .8s 1;
+            animation-fill-mode: forwards ;
+        }
+        @keyframes fade {
+            from{ opacity: 1; }
+            to{ opacity: 0; }
+        }
+        @keyframes bling {
+            0%{ opacity: 1; }
+            20%{ opacity: 0; }
+            40%{ opacity: 1; }
+            60%{ opacity: 0; }
+            80%{ opacity: 1; }
+            100%{ opacity: 0; }
+        }
+        #score{
+            position: absolute;
+            top:10px;
+            left:10px;
+            color: #f8f8f8;
+            z-index: 3;
+        }
+        #end{
+            display: none;
+            position: absolute;
+            left: 80px;
+            margin:150px auto;
+            text-align: center;
+            line-height: 100px;
+            font-weight: bolder;
+            font-size:30px;
+            color: #f8f8f8;
+            cursor: pointer;
+        }
+        #end .p3{
+            width: 120px;
+            height: 36px;
+            margin:30px auto;
+            font-size:16px;
+            line-height: 36px;
+            border: 2px solid #ffa000;
+            border-radius: 8%;
+            background: transparent;
+        }
+        #end p span{
+            color: #c04;
+        }
+    </style>
+</head>
+<body>
+    <div id="wrap">
+        <ul id="level">
+                <h3>飞机大战v1.0</h3>
+                <li>简单</li>
+                <li>中等</li>
+                <li>困难</li>
+                <li>令人发狂</li>
+        </ul>
+        <div id="map">
+            <div id="allbut"></div>
+        </div>
+        <div id="score"></div>
+        <ul id="end">
+            <p class="p1">您的最终得分是<span>0</span></p>
+            <p class="p2">恭喜你获得称号<span>水货</span></p>
+            <p class="p3">重新开始</p>
+        </ul>
+    </div>
+
+</body>
+    <script>
+        //*选择关卡
+        var wrap=document.getElementById("wrap");
+        var map=document.getElementById("map");
+        var allbut=document.getElementById("allbut");
+        var level=document.getElementById("level");
+        var Oscore=document.getElementById("score");
+        var Oend=document.getElementById("end");
+        var oli=level.children;
+        var sonbut=allbut.children;
+        //开始游戏
+        exe();
+        function exe() {
+            for(var i=1;i<oli.length;i++){
+                oli[i].index=i;
+                oli[i].onclick=function (e) {//点击关卡后，关卡消失
+                    level.style.display="none";
+                    map.style.display="block";
+                    var olevel=this.index;
+                    myback(olevel);
+
+                    e=e||event.window;
+                    x=e.clientX;
+                    y=e.clientY;
+                    var plane=document.createElement("img");
+                    //创建我军
+                    Myplane(plane);
+                    //飞机移动
+                    document.onmousemove=function move(e) {
+                        e=e||event.window;
+                        Nx=e.clientX;
+                        Ny=e.clientY;
+                        var left=Nx-wrap.offsetLeft-plane.width/2;
+                        var top=Ny-wrap.offsetTop-plane.height/2;
+                        left=left>=0?Math.min(left,wrap.clientWidth-plane.width/2):Math.max(left,-plane.width/2);
+                        top=top>=0?Math.min(top,wrap.clientHeight-plane.height/2):Math.max(top,-plane.height/2);
+                        plane.style.left=left+"px";
+                        plane.style.top=top+"px";
+                    }
+                    //发射子弹
+                    fire(plane,olevel);
+                    //产生敌军
+                    dangerous(olevel,plane);
+                    wrap.score=0;
+                }
+            }
+        }
+
+        function remove() {
+            wrap.removeChild(level);
+        }
+        //背景移动
+        function myback(level) {
+            map.style.backgroundImage = "url('img/bg_"+(level)+".jpg')";
+
+            (function m(){
+                map.bgPosY = map.bgPosY || 0;
+                map.bgPosY ++;
+                map.style.backgroundPositionY = map.bgPosY + 'px';
+                map.bgTimer = requestAnimationFrame(m);
+            })();
+        }
+        //创建我军
+        function Myplane(oimg){
+            oimg.className="plane";
+            oimg.width=60;
+            oimg.height=60;
+            oimg.style.left=x-wrap.offsetLeft-30+"px";
+            oimg.style.top=y-wrap.offsetTop-30+"px";
+            oimg.src="img/plane_0.png";
+            map.appendChild(oimg);
+        }
+        //我军移动
+        
+        //发射子弹
+        function fire(obj,num) {
+            wrap.butterInter=setInterval(function() {
+                var left=obj.offsetLeft;
+                var top=obj.offsetTop;
+                var butter=document.createElement("img");
+                butter.className="butter";
+                butter.width=30;
+                butter.height=30;
+                butter.style.left=left+15+"px";
+                butter.style.top=top-30+"px";
+                butter.src="img/fire.png";
+                allbut.appendChild(butter);
+                //子弹运动
+                function m() {
+                    var top = butter.offsetTop - butter.height;
+                    if (top < -butter.height) {
+                        allbut.removeChild(butter);
+                    }else{
+                        butter.style.top = top + "px";
+                        requestAnimationFrame(m);
+                    };
+                }
+                setTimeout(function(){
+                    requestAnimationFrame(m);
+                },50);
+
+            },[0,100,150,200,50][num]);
+        }
+        //创建敌军
+        function dangerous(num,oplane) {
+            var enemynum=1;
+            wrap.enemyInter=setInterval(function() {
+                var index=enemynum%30?1:0;
+                var enemy=document.createElement("img");
+                enemy.className="enemy";
+                enemy.HP=[30,1][index];
+                enemy.width=[78,42][index];
+                enemy.height=[60,40][index];
+                var eleft=Math.floor(Math.random()*380);
+                enemy.style.left=eleft+"px";
+                enemy.style.top=-40+"px";
+                enemy.src="img/"+["enemy_big.png","enemy_small.png"][index];
+                map.appendChild(enemy);
+                enemynum++;
+                var speed=(Math.random()*[3,6][index]+1)*enemy.height/50;
+                console.log("1....."+index);
+                function  attack() {
+                    var etop=enemy.offsetTop+speed;
+
+                    //碰撞检测
+                    if(etop>wrap.clientHeight) {
+                        map.removeChild(enemy);
+                    }else{
+                        enemy.style.top=etop+"px";
+                        for(var j=sonbut.length-1; j>=0; j--){
+                            var objbut=sonbut[j];
+                            if(coll(enemy,objbut)) {
+                                enemy.HP--;
+                                if (enemy.HP == 0) {
+                                    boom(enemy.offsetLeft, enemy.offsetTop, enemy.clientWidth, enemy.clientHeight, 0);//碰撞特效
+                                    allbut.removeChild(objbut);
+                                    map.removeChild(enemy);
+                                    wrap.score+=[20,2][index];//分数
+                                    console.log("2....."+wrap.score);
+                                    Oscore.innerHTML=wrap.score;
+                                    return;
+                                }
+                            }
+                            if(coll(enemy,oplane)){
+                                boom(oplane.offsetLeft,oplane.offsetTop,oplane.clientWidth,oplane.clientHeight,1);//碰撞特效
+                                map.removeChild(oplane);
+                                map.removeChild(enemy);
+                                Gameover();
+                                return;
+                            }
+                        }
+                        requestAnimationFrame(attack);
+                    }
+                }
+                setTimeout(function(){
+                        requestAnimationFrame(attack);
+                },50)
+            },[0,800,600,300,100][num]);
+        }
+        //碰撞检测
+        function coll(obj1,obj2) {
+            var l1=obj1.offsetLeft,
+                t1=obj1.offsetTop,
+                r1=obj1.offsetLeft+obj1.clientWidth,
+                b1=obj1.offsetTop+obj1.clientHeight;
+
+            var l2=obj2.offsetLeft,
+                t2=obj2.offsetTop,
+                r2=obj2.offsetLeft+obj2.clientWidth,
+                b2=obj2.offsetTop+obj2.clientHeight;
+            return !(l1>r2|| t1>b2 || r1<l2 || b1<t2);
+        }
+        function boom(l,t,w,h,i) {
+            var oboom=document.createElement("img");
+            oboom.className="oboom"+["","2",""][i];
+            oboom.width=w;
+            oboom.height=h;
+            oboom.style.left=l+5+"px";
+            oboom.style.top=t+5+"px";
+            oboom.src="img"+["/boom_small.png","/plane_0.png"][i];
+            map.appendChild(oboom);
+            setTimeout(function () {
+                map.removeChild(oboom);
+            },[1200,2500,1200][i])
+        }
+        function Gameover() {
+            document.onmousemove=null;
+            clearInterval(wrap.butterInter);
+            clearInterval(wrap.enemyInter);
+            Oend.style.display="block";
+            Oend.children[0].children[0].innerHTML=wrap.score;
+            Oscore.innerHTML="";
+            var honer=["水货","加油","运气不错","小有成就","杀人如麻","接近神一样","超神杀戮"];
+            switch (true){
+                case wrap.score<=20:
+                    Oend.children[1].children[0].innerHTML=honer[0];
+                    break;
+                case wrap.score<30:
+                    Oend.children[1].children[0].innerHTML=honer[1];
+                    break;
+                case wrap.score<50:
+                    Oend.children[1].children[0].innerHTML=honer[2];
+                    break;
+                case wrap.score<80:
+                    Oend.children[1].children[0].innerHTML=honer[3];
+                    break;
+                case wrap.score<100:
+                    Oend.children[1].children[0].innerHTML=honer[4];
+                    break;
+                case wrap.score<200:
+                    Oend.children[1].children[0].innerHTML=honer[5];
+                    break;
+                case wrap.score>200:
+                    Oend.children[1].children[0].innerHTML=honer[6];
+                    break;
+            }
+            Oend.children[2].onclick=function () {
+                Oend.style.display="none";
+                level.style.display="block";
+                exe();
+            }
+        }
+    </script>
+</html>
+
