@@ -3,10 +3,23 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <script>
+        changeRem();
+        function changeRem(){
+            var html=document.querySelector('html');
+            var width=html.getBoundingClientRect().width;
+            console.log(width);
+            if(width>540&width<750){
+                width=540;
+            }
+            html.style.fontSize=width/10+'px';
+        }
+        window.onresize=changeRem();
+    </script>
     <title>打飞机</title>
     <meta name="description" content="37期js班学员作业">
     <meta name="keywords" content="">
-    <link href="" rel="stylesheet">
     <style>
         *{margin: 0;padding: 0; font-family: "Microsoft yahei", Serif}
         ul,li{list-style: none}
@@ -32,11 +45,11 @@
             z-index: 1;
         }
         #level h3{
-            width: 400px;
+            width: 100%;
             height: 50px;
             margin:120px auto;
             text-align: center;
-            font-size: 36px;
+            font-size: 36px !important;
             font-weight: bolder;
             color: #fff;
         }
@@ -50,6 +63,7 @@
             text-align: center;
             line-height: 30px;
             font-weight: bolder;
+            font-size: 20px !important;
             cursor: pointer;
         }
         #level li:hover{
@@ -92,6 +106,7 @@
             left:10px;
             color: #f8f8f8;
             z-index: 3;
+            font-size: 24px;
         }
         #end{
             display: none;
@@ -101,7 +116,7 @@
             text-align: center;
             line-height: 100px;
             font-weight: bolder;
-            font-size:30px;
+            font-size:30px !important;
             color: #f8f8f8;
             cursor: pointer;
         }
@@ -109,7 +124,7 @@
             width: 120px;
             height: 36px;
             margin:30px auto;
-            font-size:16px;
+            font-size:16px !important;
             line-height: 36px;
             border: 2px solid #ffa000;
             border-radius: 8%;
@@ -118,7 +133,9 @@
         #end p span{
             color: #c04;
         }
+
     </style>
+    <link href="indexMedia.css" rel="stylesheet">
 </head>
 <body>
     <div id="wrap">
@@ -180,6 +197,7 @@
                         plane.style.left=left+"px";
                         plane.style.top=top+"px";
                     }
+                    touch(plane);
                     //发射子弹
                     fire(plane,olevel);
                     //产生敌军
@@ -364,5 +382,7 @@
             }
         }
     </script>
+    <script src="js/cssTransform.js"></script>
+    <script src="js/index.js"></script>
 </html>
 
