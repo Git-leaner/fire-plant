@@ -12,5 +12,17 @@
    <p>git add index.html</p>
    <p>gti add .</p>
    <p>commit -m "新增一个index.html文件"</p>
+   <p>git config --globla user.html</p>    
+   <p>git log</p> 
+
+    git config --global user.email "you@example.com"
+	git config --global user.name "Your Name"
+	<p>推送到远程代码仓库：git push origin master</p>
+	<p>git remote add origin ssh address</p>
+	<p>pill - work - add -commit -push</p>
+	<p>git branch dev</p>
+	<p>git checkout bh</p>
+	<p>git merge dev</p>
+	<p>git branch -d delname</p>
  </body>
 </html>
